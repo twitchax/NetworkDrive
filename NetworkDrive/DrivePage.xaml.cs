@@ -24,12 +24,30 @@ namespace NetworkDrive
     /// </summary>
     public partial class DrivePage : Page
     {
+        #region DPs.
+
         public static readonly DependencyProperty StatusTextProperty = DependencyProperty.Register("StatusText", typeof(string), typeof(DrivePage));
         public string StatusText
         {
             get { return (string)GetValue(StatusTextProperty); }
             set { SetValue(StatusTextProperty, value); }
         }
+
+        public static readonly DependencyProperty IsBlobSelectedProperty = DependencyProperty.Register("IsBlobSelected", typeof(bool), typeof(DrivePage));
+        public bool IsBlobSelected
+        {
+            get { return (bool)GetValue(IsBlobSelectedProperty); }
+            set { SetValue(IsBlobSelectedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsDirectorySelectedProperty = DependencyProperty.Register("IsDirectorySelected", typeof(bool), typeof(DrivePage));
+        public bool IsDirectorySelected
+        {
+            get { return (bool)GetValue(IsDirectorySelectedProperty); }
+            set { SetValue(IsDirectorySelectedProperty, value); }
+        }
+
+        #endregion
 
         public DrivePage()
         {
@@ -47,13 +65,13 @@ namespace NetworkDrive
         #region Blob operations.
 
         /// <summary>
-        /// Handle double-click to download blob.
+        /// Handle button to download blob.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void BlockBlob_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void DownloadButton_Click(object sender, RoutedEventArgs e)
         {
-            var item = sender as TreeViewItem;
+            var item = View.SelectedItem as TreeViewItem;
             var blob = item.Tag as CloudBlockBlob;
             var name = item.Header as string;
 
@@ -72,13 +90,13 @@ namespace NetworkDrive
         }
 
         /// <summary>
-        /// Handle double-click to upload into a directory.
+        /// Handle button to upload into a directory.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void Directory_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private async void UploadButton_Click(object sender, RoutedEventArgs e)
         {
-            var item = sender as TreeViewItem;
+            var item = View.SelectedItem as TreeViewItem;
 
             var (containerName, directoryName) = GetContainerAndDirectory(item);
 
@@ -105,16 +123,13 @@ namespace NetworkDrive
         }
 
         /// <summary>
-        /// Handle DELETE to delete a blob.
+        /// Handle button to delete a blob.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void BlockBlob_KeyUp(object sender, KeyEventArgs e)
+        private async void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
-            if (e.Key != Key.Delete)
-                return;
-
-            var item = sender as TreeViewItem;
+            var item = View.SelectedItem as TreeViewItem;
             var blob = item.Tag as CloudBlockBlob;
             var name = item.Header as string;
 
@@ -159,7 +174,6 @@ namespace NetworkDrive
                 Header = container.Name,
                 Name = container.Name
             };
-            item.MouseDoubleClick += Directory_MouseDoubleClick;
 
             var blobs = container.ListBlobs(useFlatBlobListing: true)
                 .Cast<CloudBlockBlob>()
@@ -219,12 +233,6 @@ namespace NetworkDrive
                 if(node.Blob != null) // Block blob.
                 {
                     item.Tag = node.Blob;
-                    item.MouseDoubleClick += BlockBlob_MouseDoubleClick;
-                    item.KeyUp += BlockBlob_KeyUp;
-                }
-                else // Directory.
-                {
-                    item.MouseDoubleClick += Directory_MouseDoubleClick;
                 }
 
                 BuildTreeView(item, node.Children);
@@ -256,6 +264,21 @@ namespace NetworkDrive
             var directory = directoryBuilder.ToString();
 
             return (container, directory);
+        }
+
+        /// <summary>
+        /// Update blob/directory selection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void View_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var item = (sender as TreeView).SelectedItem as TreeViewItem;
+
+            if (item == null)
+                return;
+
+            IsDirectorySelected = !(IsBlobSelected = item.Tag != null);
         }
 
         #endregion
