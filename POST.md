@@ -1,28 +1,16 @@
 # Azure Blob Storage as a Network Drive
 
-Before the time of OneDrive, sharing files with family, roommates, or coworkers was often performed with the help of a network drive.  If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions to problems that only kind of existed.  In my case, this took the form of a network share for my roommates wrapped in a handy little app.
+Sharing files with family, roommates, or coworkers was often performed with the help of a network drive.  In addition, many applications make use of a network drive to backup and store files.  If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions to problems that only kind of existed.  In my case, this took the form of a network share for my roommates wrapped in a handy little app.
 
-Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed.  Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with [Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).  I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store.  We are going to build this app as it was in its glory days, which means we need a few things.
+Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed.  Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with [Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).  In the past, network drives did the trick, but Azure Storage offers users better flexibility and global availability, all at a reasonable cost.  
+
+I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store.  We are going to build this app as it was in its glory days, which means we need a few things.
 
 ## Prerequisites
 
 I built this app in [WPF](https://docs.microsoft.com/en-us/dotnet/framework/wpf/getting-started/introduction-to-wpf-in-vs) using [Visual Studio 2017](https://www.visualstudio.com/).  In addition, I used the [Azure Storage for .NET](https://www.nuget.org/packages/WindowsAzure.Storage/) library.  Finally, you will notice that I left off a few components that would be required in a production app: for purposes of reducing code, the authentication method requires a [Storage account](https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account) key, and I have kept the UI strictly utilitarian.
 
-## The User Interface
-
-As a former developer on the [XAML](https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/xaml-overview-wpf) Developer Platform Team in Windows, I am always excited to stretch my XAML skills after a long time off.  Despite getting back into it, I did not really have much to do.  So little, in fact, I decided to completely ignore using `Style`s.  Our XAML looks something like this.
-
-```xml
-<Grid>
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10,10,10" Width="400" Height="30">
-        <Button Name="DownloadButton" Content="Download" IsEnabled="{Binding IsBlobSelected}" Click="DownloadButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
-        <Button Name="UploadButton" Content="Upload" IsEnabled="{Binding IsDirectorySelected}" Click="UploadButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
-        <Button Name="DeleteButton" Content="Delete" IsEnabled="{Binding IsBlobSelected}" Click="DeleteButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
-    </StackPanel>
-    <TreeView Name="View" Margin="10,50,10,50" SelectedItemChanged="View_SelectedItemChanged" />
-    <TextBlock Name="Status" Text="{Binding StatusText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Width="400" Height="30"></TextBlock>
-</Grid>
-```
+While I made the choice to build this app in WPF, the following Azure Storage solution works with any .NET Application type including Windows Forms, ASP.NET, Console, etc.
 
 ## Representing the Account as a TreeView
 
@@ -177,6 +165,24 @@ async void DeleteButton_Click(object sender, RoutedEventArgs e)
 ```
 
 As was the case for downloading blobs, the `CloudBlockBlob` is easily attained from the `TreeViewItem`, having been attached previously.  Again, performing the actual operation only requires only one call to `blob.DeleteAsync`.
+
+## The User Interface
+
+As I mentioned previously, the Azure Storage solution we built is applicable to any type of .NET Application.  I decided to use WPF, but the choice for this specific endeavour was made out of a personal love for XAML.
+
+As a former developer on the [XAML](https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/xaml-overview-wpf) Developer Platform Team in Windows, I am always excited to stretch my XAML skills after a long time off.  Despite getting back into it, I did not really have much to do.  So little, in fact, I decided to completely ignore using `Style`s.  Our XAML looks something like this.
+
+```xml
+<Grid>
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10,10,10" Width="400" Height="30">
+        <Button Name="DownloadButton" Content="Download" IsEnabled="{Binding IsBlobSelected}" Click="DownloadButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
+        <Button Name="UploadButton" Content="Upload" IsEnabled="{Binding IsDirectorySelected}" Click="UploadButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
+        <Button Name="DeleteButton" Content="Delete" IsEnabled="{Binding IsBlobSelected}" Click="DeleteButton_Click" Margin="10,0,0,0" Width="100" Height="30"></Button>
+    </StackPanel>
+    <TreeView Name="View" Margin="10,50,10,50" SelectedItemChanged="View_SelectedItemChanged" />
+    <TextBlock Name="Status" Text="{Binding StatusText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Width="400" Height="30"></TextBlock>
+</Grid>
+```
 
 ## Putting It All Together
 

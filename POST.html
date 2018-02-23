@@ -1,20 +1,10 @@
 <h1 id="azureblobstorageasanetworkdrive">Azure Blob Storage as a Network Drive</h1>
-<p>Before the time of OneDrive, sharing files with family, roommates, or coworkers was often performed with the help of a network drive.  If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions to problems that only kind of existed.  In my case, this took the form of a network share for my roommates wrapped in a handy little app.</p>
-<p>Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed.  Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with <a href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction">Azure Blob Storage</a>.  I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store.  We are going to build this app as it was in its glory days, which means we need a few things.</p>
+<p>Sharing files with family, roommates, or coworkers was often performed with the help of a network drive.  In addition, many applications make use of a network drive to backup and store files.  If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions to problems that only kind of existed.  In my case, this took the form of a network share for my roommates wrapped in a handy little app.</p>
+<p>Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed.  Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with <a href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction">Azure Blob Storage</a>.  In the past, network drives did the trick, but Azure Storage offers users better flexibility and global availability, all at a reasonable cost.  </p>
+<p>I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store.  We are going to build this app as it was in its glory days, which means we need a few things.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <p>I built this app in <a href="https://docs.microsoft.com/en-us/dotnet/framework/wpf/getting-started/introduction-to-wpf-in-vs">WPF</a> using <a href="https://www.visualstudio.com/">Visual Studio 2017</a>.  In addition, I used the <a href="https://www.nuget.org/packages/WindowsAzure.Storage/">Azure Storage for .NET</a> library.  Finally, you will notice that I left off a few components that would be required in a production app: for purposes of reducing code, the authentication method requires a <a href="https://docs.microsoft.com/en-us/azure/storage/common/storage-create-storage-account">Storage account</a> key, and I have kept the UI strictly utilitarian.</p>
-<h2 id="theuserinterface">The User Interface</h2>
-<p>As a former developer on the <a href="https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/xaml-overview-wpf">XAML</a> Developer Platform Team in Windows, I am always excited to stretch my XAML skills after a long time off.  Despite getting back into it, I did not really have much to do.  So little, in fact, I decided to completely ignore using <code>Style</code>s.  Our XAML looks something like this.</p>
-<pre><code class="xml language-xml">&lt;Grid&gt;
-    &lt;StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10,10,10" Width="400" Height="30"&gt;
-        &lt;Button Name="DownloadButton" Content="Download" IsEnabled="{Binding IsBlobSelected}" Click="DownloadButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
-        &lt;Button Name="UploadButton" Content="Upload" IsEnabled="{Binding IsDirectorySelected}" Click="UploadButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
-        &lt;Button Name="DeleteButton" Content="Delete" IsEnabled="{Binding IsBlobSelected}" Click="DeleteButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
-    &lt;/StackPanel&gt;
-    &lt;TreeView Name="View" Margin="10,50,10,50" SelectedItemChanged="View_SelectedItemChanged" /&gt;
-    &lt;TextBlock Name="Status" Text="{Binding StatusText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Width="400" Height="30"&gt;&lt;/TextBlock&gt;
-&lt;/Grid&gt;
-</code></pre>
+<p>While I made the choice to build this app in WPF, the following Azure Storage solution works with any .NET Application type including Windows Forms, ASP.NET, Console, etc.</p>
 <h2 id="representingtheaccountasatreeview">Representing the Account as a TreeView</h2>
 <p>At its core, the app needs to display the current state of the blob account in a human-consumable fashion.  In a stroke of ingenuity, I decided to represent the containers, directories, and blobs as a <a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.treeview.aspx">TreeView</a>.  There are some existing solutions for computing trees from a flat list of blobs, but I opted to build it out myself since Azure Storage makes the rest of the app a breeze.</p>
 <p>As expected, we must build a tree for each container.  First, we must obtain a flat list of the blobs in the container.</p>
@@ -136,6 +126,19 @@ my/share/private/file.jpg
 }
 </code></pre>
 <p>As was the case for downloading blobs, the <code>CloudBlockBlob</code> is easily attained from the <code>TreeViewItem</code>, having been attached previously.  Again, performing the actual operation only requires only one call to <code>blob.DeleteAsync</code>.</p>
+<h2 id="theuserinterface">The User Interface</h2>
+<p>As I mentioned previously, the Azure Storage solution we built is applicable to any type of .NET Application.  I decided to use WPF, but the choice for this specific endeavour was made out of a personal love for XAML.</p>
+<p>As a former developer on the <a href="https://docs.microsoft.com/en-us/dotnet/framework/wpf/advanced/xaml-overview-wpf">XAML</a> Developer Platform Team in Windows, I am always excited to stretch my XAML skills after a long time off.  Despite getting back into it, I did not really have much to do.  So little, in fact, I decided to completely ignore using <code>Style</code>s.  Our XAML looks something like this.</p>
+<pre><code class="xml language-xml">&lt;Grid&gt;
+    &lt;StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,10,10,10" Width="400" Height="30"&gt;
+        &lt;Button Name="DownloadButton" Content="Download" IsEnabled="{Binding IsBlobSelected}" Click="DownloadButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
+        &lt;Button Name="UploadButton" Content="Upload" IsEnabled="{Binding IsDirectorySelected}" Click="UploadButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
+        &lt;Button Name="DeleteButton" Content="Delete" IsEnabled="{Binding IsBlobSelected}" Click="DeleteButton_Click" Margin="10,0,0,0" Width="100" Height="30"&gt;&lt;/Button&gt;
+    &lt;/StackPanel&gt;
+    &lt;TreeView Name="View" Margin="10,50,10,50" SelectedItemChanged="View_SelectedItemChanged" /&gt;
+    &lt;TextBlock Name="Status" Text="{Binding StatusText}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10" Width="400" Height="30"&gt;&lt;/TextBlock&gt;
+&lt;/Grid&gt;
+</code></pre>
 <h2 id="puttingitalltogether">Putting It All Together</h2>
 <p>So, there we have it.  We have built an app that acts as a network drive using Azure Blob Storage.  Implementing more operations and polishing th UI is merely an exercise in elbow grease.  If you would like to try out this app, or use the code we went through as a base, take a look at the <a href="https://github.com/twitchax/networkdrive">source</a>.</p>
 <p>I hope the work we did here excites you to take existing applications or ideas and port them to equivalent functionality in Azure!</p>
