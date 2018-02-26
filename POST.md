@@ -1,10 +1,10 @@
 # Azure Blob Storage as a Network Drive
 
-Sharing files with family, roommates, or coworkers was often performed with the help of a network drive.  In addition, many applications make use of a network drive to backup and store files.  If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions to problems that only kind of existed.  In my case, this took the form of a network share for my roommates wrapped in a handy little app.
+Many applications make use of a network drive to backup and store files. If you were, for example, constantly coding at University for fun, you might find yourself finding software solutions for fun. In my case, this took the form of a network share for my roommates wrapped in a handy little app.
 
-Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed.  Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with [Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction).  In the past, network drives did the trick, but Azure Storage offers users better flexibility and global availability, all at a reasonable cost.  
+Unfortunately, that very app has long since been erased from whichever hard drive it was initially birthed. Fortunately, I think we can reinvent this magical piece of software (albeit to a scoped degree) with [Azure Blob Storage](https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blobs-introduction). In the past, network drives did the trick, but Azure Storage offers users better flexibility and global availability, [all at a very low cost](https://azure.microsoft.com/en-us/pricing/details/storage) (or no cost if you are using [free Azure credits](https://azure.microsoft.com/en-us/free)).
 
-I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store.  We are going to build this app as it was in its glory days, which means we need a few things.
+I took my partial memory of the general skeleton of the former masterpiece and rewrote it using Blobs as the backing file store. We are going to build this app as it was in its glory days, which means we need a few things.
 
 ## Prerequisites
 
